@@ -67,7 +67,7 @@ WindowLocatorInfoTypedDict = TypedDict(
 )
 
 
-class MatchesAndHierarchy(TypedDict):
+class MatchesAndHierarchyTypedDict(TypedDict):
     # A list with the `path` items matched (these are the ones that the
     # locator matched)
     matched_paths: List[str]
@@ -169,7 +169,8 @@ class WindowsInspector:
             ElementInspector,
         )
 
-        pick_window = find_window(window_locator)
+        # No timeout. The windows must be there already.
+        pick_window = find_window(window_locator, timeout=0)
         self._element_inspector = ElementInspector(pick_window)
 
     def _on_internal_pick(self, found: List["ControlTreeNode[ControlElement]"]):
@@ -220,7 +221,7 @@ class WindowsInspector:
         locator: str,
         search_depth: int = 8,
         search_strategy: Literal["siblings", "all"] = "all",
-    ) -> MatchesAndHierarchy:
+    ) -> MatchesAndHierarchyTypedDict:
         """
         Starts highlighting the matches given by the locator specified.
 
