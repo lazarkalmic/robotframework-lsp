@@ -80,6 +80,9 @@ mypy_path = "src:tests"
 [tool.isort]
 profile = "black"
 
+[tool.black]
+exclude = "vendored"
+
 [tool.ruff]
 ignore = [
     "E501", # Line-len.

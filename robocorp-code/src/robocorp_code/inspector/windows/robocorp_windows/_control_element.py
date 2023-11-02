@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import Callable, Iterator, List, Literal, Optional, Tuple, Union
 
 from ._com_error import COMError
-
 from ._errors import ActionNotPossible, ElementNotFound
 from ._find_ui_automation import LocatorStrAndOrSearchParams
 from .protocols import Locator
