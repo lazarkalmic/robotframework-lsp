@@ -35,7 +35,7 @@ msgspec = "^0.18"
 pyyaml = "^6"
 robocorp-inspector = "0.10.2"
 playwright = "<2"
-pillow = "^10.0.1"
+pillow = "^9.0"
 pywin32 = { version = ">=300,<304", platform = "win32", python = "!=3.8.1" }
 
 [tool.poetry.group.dev.dependencies]
@@ -71,7 +71,7 @@ types-mock = "*"
 types-PyYAML = "*"
 robocorp-log-pytest = "*"
 types-docutils = "*"
-types-Pillow = "^10.0.1"
+types-Pillow = "^9.0"
 types-pywin32 = "304.0.0.6"
 
 [tool.mypy]
