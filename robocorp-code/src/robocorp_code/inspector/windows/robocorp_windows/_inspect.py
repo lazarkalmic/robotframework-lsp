@@ -640,7 +640,7 @@ class _PickerThread(threading.Thread):
             else:
                 print(f"Unable to find child index for: {control}", file=sys.stderr)
                 return
-        except _ctypes.COMError:
+        except COMError:
             pass  # Ignore, if the user is out of bounds it'll be raised.
         else:
             if not parent_path:

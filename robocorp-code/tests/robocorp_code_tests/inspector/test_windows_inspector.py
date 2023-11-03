@@ -41,7 +41,12 @@ def test_windows_inspector(windows_inspector: WindowsInspector) -> None:
 
     try:
         windows_inspector.on_pick.register(on_pick)
-        tree_elements = windows_inspector.collect_tree(f"control:Button")
+        matches_and_hierarchy = windows_inspector.collect_tree(f"control:Button")
+        matched_paths = set(matches_and_hierarchy["matched_paths"])
+        hierarchy = matches_and_hierarchy["hierarchy"]
+        tree_elements = [
+            control for control in hierarchy if control["path"] in matched_paths
+        ]
         assert len(tree_elements) == 10
 
         bt = tree_elements[0]
