@@ -327,6 +327,32 @@ class _WindowsStartHighlight(_WindowsBaseCommand):
         return {"success": True, "message": None, "result": result}
 
 
+class _WindowsCollectTree(_WindowsBaseCommand):
+    def __init__(
+        self,
+        locator,
+        search_depth: int = 8,
+        search_strategy: Literal["siblings", "all"] = "all",
+    ):
+        super().__init__()
+        self.locator = locator
+        self.search_depth = search_depth
+        self.search_strategy = search_strategy
+
+    def __call__(
+        self, windows_inspector_thread: _WindowsInspectorThread
+    ) -> ActionResultDict:
+        if not windows_inspector_thread.windows_inspector:
+            raise RuntimeError("windows_inspector not initialized.")
+        result = windows_inspector_thread.windows_inspector.collect_tree(
+            locator=self.locator,
+            search_depth=self.search_depth,
+            search_strategy=self.search_strategy,
+        )
+
+        return {"success": True, "message": None, "result": result}
+
+
 class _WindowsStopHighlight(_WindowsBaseCommand):
     def __call__(
         self, windows_inspector_thread: _WindowsInspectorThread
@@ -442,6 +468,16 @@ class InspectorApi(PythonLanguageServer):
     ) -> ActionResultDict:
         return self._enqueue_windows(
             _WindowsStartHighlight(locator, search_depth, search_strategy)
+        )
+
+    def m_windows_collect_tree(
+        self,
+        locator,
+        search_depth: int = 8,
+        search_strategy: Literal["siblings", "all"] = "all",
+    ) -> ActionResultDict:
+        return self._enqueue_windows(
+            _WindowsCollectTree(locator, search_depth, search_strategy)
         )
 
     def m_windows_stop_highlight(self) -> ActionResultDict:

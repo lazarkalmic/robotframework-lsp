@@ -266,6 +266,24 @@ class InspectorLanguageServer:
             ),
         )
 
+    def m_windows_inspector_collect_tree(
+        self,
+        locator: str,
+        search_depth: int = 8,
+        search_strategy: Literal["siblings", "all"] = "all",
+    ):
+        inspector_api_client = self._inspector_server_manager.get_inspector_api_client()
+        # Not blocking (return callback to run in thread).
+        return partial(
+            inspector_api_client.send_sync_message,
+            "windowsCollectTree",
+            dict(
+                locator=locator,
+                search_depth=search_depth,
+                search_strategy=search_strategy,
+            ),
+        )
+
     def m_windows_inspector_stop_highlight(self):
         inspector_api_client = self._inspector_server_manager.get_inspector_api_client()
         # Not blocking (return callback to run in thread).

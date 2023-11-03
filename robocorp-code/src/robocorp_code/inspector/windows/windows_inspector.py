@@ -1,6 +1,16 @@
 import enum
 import typing
-from typing import Any, Callable, List, Literal, Optional, Set, TypedDict, Union
+from typing import (
+    Any,
+    Callable,
+    List,
+    Literal,
+    Optional,
+    Sequence,
+    Set,
+    TypedDict,
+    Union,
+)
 
 from robocorp_ls_core.callbacks import Callback
 
@@ -135,6 +145,31 @@ class _State(enum.Enum):
     highlighting = 3
 
 
+def to_matches_and_hierarchy(
+    parent: "ControlElement", matched_controls: Sequence["ControlElement"]
+) -> MatchesAndHierarchyTypedDict:
+    from robocorp_code.inspector.windows.robocorp_windows._inspect import (
+        build_parent_hierarchy,
+    )
+
+    hierarchy: List[ControlLocatorInfoTypedDict] = []
+    matched_paths: List[str] = []
+
+    # Keep the paths already seen.
+    already_in_hierarchy: Set[str] = set()
+    for control in matched_controls:
+        path = control.location_info.path
+        assert path
+        matched_paths.append(path)
+
+        for node in build_parent_hierarchy(control, parent):
+            if node.path not in already_in_hierarchy:
+                already_in_hierarchy.add(node.path)
+                hierarchy.append(to_control_info(node.control))
+
+    return {"matched_paths": matched_paths, "hierarchy": hierarchy}
+
+
 class WindowsInspector:
     def __init__(self) -> None:
         from robocorp_code.inspector.windows.robocorp_windows._inspect import (
@@ -236,9 +271,6 @@ class WindowsInspector:
             raise RuntimeError(
                 "Unable to make match because `set_window_locator` was not previously used to set the window of interest."
             )
-        from robocorp_code.inspector.windows.robocorp_windows._inspect import (
-            build_parent_hierarchy,
-        )
 
         matched_controls = self._element_inspector.start_highlight(
             locator,
@@ -247,24 +279,8 @@ class WindowsInspector:
             search_strategy=search_strategy,
         )
 
-        hierarchy: List[ControlLocatorInfoTypedDict] = []
-        matched_paths: List[str] = []
-
-        # Keep the paths already seen.
-        already_in_hierarchy: Set[str] = set()
-        for control in matched_controls:
-            path = control.location_info.path
-            assert path
-            matched_paths.append(path)
-
-            for node in build_parent_hierarchy(
-                control, self._element_inspector.control_element
-            ):
-                if node.path not in already_in_hierarchy:
-                    already_in_hierarchy.add(node.path)
-                    hierarchy.append(to_control_info(node.control))
-
-        return {"matched_paths": matched_paths, "hierarchy": hierarchy}
+        parent = self._element_inspector.control_element
+        return to_matches_and_hierarchy(parent, matched_controls)
 
     def stop_highlight(self) -> None:
         """
@@ -286,16 +302,20 @@ class WindowsInspector:
         locator: str,
         search_depth: int = 8,
         search_strategy: Literal["siblings", "all"] = "all",
-    ) -> List[ControlLocatorInfoTypedDict]:
-        if self._element_inspector is None:
-            return []
+    ) -> MatchesAndHierarchyTypedDict:
+        if not self._element_inspector:
+            raise RuntimeError(
+                "Unable to collect tree because `set_window_locator` was not previously used to set the window of interest."
+            )
 
-        ret: List[ControlLocatorInfoTypedDict] = []
-        for el in self._element_inspector.control_element.find_many(
+        matched_controls: List[
+            "ControlElement"
+        ] = self._element_inspector.control_element.find_many(
             locator,
             search_depth=search_depth,
             search_strategy=search_strategy,
             timeout=0,
-        ):
-            ret.append(to_control_info(el))
-        return ret
+        )
+        return to_matches_and_hierarchy(
+            self._element_inspector.control_element, matched_controls
+        )

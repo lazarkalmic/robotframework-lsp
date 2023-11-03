@@ -1259,5 +1259,9 @@ def test_windows_inspector_integrated(
     assert result["success"]
     assert len(result["result"]["matched_paths"]) > 4
 
+    result = api_client.m_windows_inspector_collect_tree(locator="control:Button")
+    assert result["success"]
+    assert len(result["result"]["matched_paths"]) > 4
+
     result = api_client.m_windows_inspector_stop_highlight()
     assert result["success"]
